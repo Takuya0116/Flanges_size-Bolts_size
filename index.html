@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            padding-bottom: 120px; /* 広告分の余白を追加 */
             color: #333;
         }
 
@@ -52,8 +53,16 @@
             align-items: center;
         }
 
+        /* 入力項目を2×2グリッドに配置 */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 0;
         }
 
         label {
@@ -211,7 +220,56 @@
             box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
         }
 
+        /* 広告を画面下部に固定するCSS - サイズを調整 */
+        .ad-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* 高さを制限 */
+            text-align: center;
+            background: white;
+            padding: 5px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            overflow: hidden; /* はみ出し部分を隠す */
+        }
+
+        .ad-container ins {
+            max-height: 90px; /* 広告の最大高さを制限 */
+            overflow: hidden;
+        }
+
+        /* タブレット・iPad対応 */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .input-grid {
+                gap: 15px;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            .ad-container {
+                height: 80px; /* タブレットでは広告をさらに小さく */
+            }
+            
+            .ad-container ins {
+                max-height: 70px;
+            }
+            
+            body {
+                padding-bottom: 100px; /* タブレット用の余白調整 */
+            }
+        }
+
+        /* スマートフォン対応 */
         @media (max-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr; /* スマホでは縦1列に戻す */
+                gap: 15px;
+            }
+
             .bolt-specs {
                 grid-template-columns: 1fr;
             }
@@ -223,23 +281,22 @@
             h1 {
                 font-size: 24px;
             }
+            
+            .ad-container {
+                height: 60px; /* スマホでは広告をさらに小さく */
+            }
+            
+            .ad-container ins {
+                max-height: 50px;
+            }
+            
+            body {
+                padding-bottom: 80px; /* スマホ用の余白調整 */
+            }
         }
 
         .hidden {
             display: none;
-        }
-        
-        /* 広告を画面下部に固定するCSS */
-        .ad-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            background: white;
-            padding: 5px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
         }
     </style>
 </head>
@@ -251,24 +308,26 @@
             <div class="section">
                 <h3>📏 測定値を入力</h3>
 
-                <div class="input-group">
-                    <label for="outerDiameter">フランジ外径 (mm)</label>
-                    <input type="number" id="outerDiameter" placeholder="例: 220" min="1">
-                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="outerDiameter">フランジ外径 (mm)</label>
+                        <input type="number" id="outerDiameter" placeholder="例: 220" min="1">
+                    </div>
 
-                <div class="input-group">
-                    <label for="boltHoles">ボルト穴数</label>
-                    <input type="number" id="boltHoles" placeholder="例: 8" min="1">
-                </div>
+                    <div class="input-group">
+                        <label for="boltHoles">ボルト穴数</label>
+                        <input type="number" id="boltHoles" placeholder="例: 8" min="1">
+                    </div>
 
-                <div class="input-group">
-                    <label for="thickness">フランジ厚み (mm)</label>
-                    <input type="number" id="thickness" placeholder="例: 20" min="1">
-                </div>
+                    <div class="input-group">
+                        <label for="thickness">フランジ厚み (mm)</label>
+                        <input type="number" id="thickness" placeholder="例: 20" min="1">
+                    </div>
 
-                <div class="input-group">
-                    <label for="pcd">ボルト中心円径 - PCD (mm) ※任意</label>
-                    <input type="number" id="pcd" placeholder="例: 180">
+                    <div class="input-group">
+                        <label for="pcd">ボルト中心円径 - PCD (mm) ※任意</label>
+                        <input type="number" id="pcd" placeholder="例: 180">
+                    </div>
                 </div>
             </div>
 
@@ -539,7 +598,7 @@
     <div class="ad-container">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         <ins class="adsbygoogle"
-             style="display:block"
+             style="display:block; max-height:90px; overflow:hidden;"
              data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
              data-ad-slot="yyyyyyyyyyyyyyyy"
              data-ad-format="auto"
