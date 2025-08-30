@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>フランジサイズ特定・ボルト推奨アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4299e1;
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 16px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .rank-1 .rank-badge { background: linear-gradient(135deg, #ffd700, #ffb700); }
+        .rank-2 .rank-badge { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); }
+        .rank-3 .rank-badge { background: linear-gradient(135deg, #cd7f32, #b8722c); }
+
+        .flange-info {
+            margin-bottom: 15px;
+        }
+
+        .flange-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .flange-details {
+            color: #4a5568;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .bolt-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .bolt-type {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .bolt-type h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .gasket-info {
+            background: #e6fffa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #38b2ac;
+        }
+
+        .accuracy {
+            background: #f0fff4;
+            color: #22543d;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid #9ae6b4;
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            margin-top: 30px;
+        }
+
+        .home-btn:hover {
+            box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .bolt-specs {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        /* 広告を画面下部に固定するCSS */
+        .ad-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background: white;
+            padding: 5px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 フランジサイズ特定・ボルト推奨アプリ</h1>
+
+        <div id="inputSection">
+            <div class="section">
+                <h3>📏 測定値を入力</h3>
+
+                <div class="input-group">
+                    <label for="outerDiameter">フランジ外径 (mm)</label>
+                    <input type="number" id="outerDiameter" placeholder="例: 220" min="1">
+                </div>
+
+                <div class="input-group">
+                    <label for="boltHoles">ボルト穴数</label>
+                    <input type="number" id="boltHoles" placeholder="例: 8" min="1">
+                </div>
+
+                <div class="input-group">
+                    <label for="thickness">フランジ厚み (mm)</label>
+                    <input type="number" id="thickness" placeholder="例: 20" min="1">
+                </div>
+
+                <div class="input-group">
+                    <label for="pcd">ボルト中心円径 - PCD (mm) ※任意</label>
+                    <input type="number" id="pcd" placeholder="例: 180">
+                </div>
+            </div>
+
+            <button class="btn" onclick="identifyFlange()">
+                🔍 フランジを特定してボルトを推奨
+            </button>
+        </div>
+
+        <div id="results" class="results">
+            <div class="section">
+                <h3>🏆 特定結果 (精度順ランキング)</h3>
+                <div id="gasketInfo" class="gasket-info"></div>
+                <div id="resultsContainer"></div>
+            </div>
+
+            <button class="btn home-btn" onclick="goHome()">
+                🏠 新しい測定を開始
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // フランジデータベース
+        const flangeDatabase = [
+            // JIS 5K フランジ
+            {standard: 'JIS', pressure: '5K', size: '10A', outerDiameter: 90, boltHoles: 4, thickness: 14, boltSize: 'M10', boltPitch: 1.5, nutThickness: 8, pcd: 60},
+            {standard: 'JIS', pressure: '5K', size: '15A', outerDiameter: 95, boltHoles: 4, thickness: 14, boltSize: 'M10', boltPitch: 1.5, nutThickness: 8, pcd: 65},
+            {standard: 'JIS', pressure: '5K', size: '20A', outerDiameter: 105, boltHoles: 4, thickness: 16, boltSize: 'M10', boltPitch: 1.5, nutThickness: 8, pcd: 75},
+            {standard: 'JIS', pressure: '5K', size: '25A', outerDiameter: 115, boltHoles: 4, thickness: 16, boltSize: 'M10', boltPitch: 1.5, nutThickness: 8, pcd: 85},
+            {standard: 'JIS', pressure: '5K', size: '32A', outerDiameter: 140, boltHoles: 4, thickness: 18, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 100},
+            {standard: 'JIS', pressure: '5K', size: '40A', outerDiameter: 150, boltHoles: 4, thickness: 18, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 110},
+            {standard: 'JIS', pressure: '5K', size: '50A', outerDiameter: 165, boltHoles: 4, thickness: 20, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 125},
+            {standard: 'JIS', pressure: '5K', size: '65A', outerDiameter: 185, boltHoles: 4, thickness: 20, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 145},
+            {standard: 'JIS', pressure: '5K', size: '80A', outerDiameter: 200, boltHoles: 8, thickness: 22, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 160},
+            {standard: 'JIS', pressure: '5K', size: '100A', outerDiameter: 220, boltHoles: 8, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 180},
+            {standard: 'JIS', pressure: '5K', size: '125A', outerDiameter: 250, boltHoles: 8, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 210},
+            {standard: 'JIS', pressure: '5K', size: '150A', outerDiameter: 285, boltHoles: 8, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 240},
+            {standard: 'JIS', pressure: '5K', size: '200A', outerDiameter: 340, boltHoles: 8, thickness: 26, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 295},
+            {standard: 'JIS', pressure: '5K', size: '250A', outerDiameter: 405, boltHoles: 12, thickness: 28, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 355},
+            {standard: 'JIS', pressure: '5K', size: '300A', outerDiameter: 460, boltHoles: 12, thickness: 28, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 410},
+
+            // JIS 10K フランジ
+            {standard: 'JIS', pressure: '10K', size: '10A', outerDiameter: 90, boltHoles: 4, thickness: 16, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 60},
+            {standard: 'JIS', pressure: '10K', size: '15A', outerDiameter: 95, boltHoles: 4, thickness: 16, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 65},
+            {standard: 'JIS', pressure: '10K', size: '20A', outerDiameter: 105, boltHoles: 4, thickness: 18, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 75},
+            {standard: 'JIS', pressure: '10K', size: '25A', outerDiameter: 115, boltHoles: 4, thickness: 18, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 85},
+            {standard: 'JIS', pressure: '10K', size: '32A', outerDiameter: 140, boltHoles: 4, thickness: 20, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 100},
+            {standard: 'JIS', pressure: '10K', size: '40A', outerDiameter: 150, boltHoles: 4, thickness: 20, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 110},
+            {standard: 'JIS', pressure: '10K', size: '50A', outerDiameter: 165, boltHoles: 4, thickness: 22, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 125},
+            {standard: 'JIS', pressure: '10K', size: '65A', outerDiameter: 185, boltHoles: 4, thickness: 22, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 145},
+            {standard: 'JIS', pressure: '10K', size: '80A', outerDiameter: 200, boltHoles: 8, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 160},
+            {standard: 'JIS', pressure: '10K', size: '100A', outerDiameter: 220, boltHoles: 8, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 180},
+            {standard: 'JIS', pressure: '10K', size: '125A', outerDiameter: 250, boltHoles: 8, thickness: 26, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 210},
+            {standard: 'JIS', pressure: '10K', size: '150A', outerDiameter: 285, boltHoles: 8, thickness: 26, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 240},
+            {standard: 'JIS', pressure: '10K', size: '200A', outerDiameter: 340, boltHoles: 12, thickness: 28, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 295},
+            {standard: 'JIS', pressure: '10K', size: '250A', outerDiameter: 405, boltHoles: 12, thickness: 30, boltSize: 'M22', boltPitch: 2.5, nutThickness: 18, pcd: 355},
+            {standard: 'JIS', pressure: '10K', size: '300A', outerDiameter: 460, boltHoles: 16, thickness: 30, boltSize: 'M22', boltPitch: 2.5, nutThickness: 18, pcd: 410},
+
+            // JIS 20K フランジ
+            {standard: 'JIS', pressure: '20K', size: '10A', outerDiameter: 90, boltHoles: 4, thickness: 20, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 60},
+            {standard: 'JIS', pressure: '20K', size: '15A', outerDiameter: 95, boltHoles: 4, thickness: 20, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 65},
+            {standard: 'JIS', pressure: '20K', size: '20A', outerDiameter: 105, boltHoles: 4, thickness: 22, boltSize: 'M12', boltPitch: 1.75, nutThickness: 10, pcd: 75},
+            {standard: 'JIS', pressure: '20K', size: '25A', outerDiameter: 115, boltHoles: 4, thickness: 22, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 85},
+            {standard: 'JIS', pressure: '20K', size: '32A', outerDiameter: 140, boltHoles: 4, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 100},
+            {standard: 'JIS', pressure: '20K', size: '40A', outerDiameter: 150, boltHoles: 4, thickness: 24, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 110},
+            {standard: 'JIS', pressure: '20K', size: '50A', outerDiameter: 165, boltHoles: 8, thickness: 26, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 125},
+            {standard: 'JIS', pressure: '20K', size: '65A', outerDiameter: 185, boltHoles: 8, thickness: 26, boltSize: 'M16', boltPitch: 2.0, nutThickness: 13, pcd: 145},
+            {standard: 'JIS', pressure: '20K', size: '80A', outerDiameter: 200, boltHoles: 8, thickness: 28, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 160},
+            {standard: 'JIS', pressure: '20K', size: '100A', outerDiameter: 220, boltHoles: 8, thickness: 28, boltSize: 'M20', boltPitch: 2.5, nutThickness: 16, pcd: 180},
+            {standard: 'JIS', pressure: '20K', size: '125A', outerDiameter: 250, boltHoles: 8, thickness: 30, boltSize: 'M22', boltPitch: 2.5, nutThickness: 18, pcd: 210},
+            {standard: 'JIS', pressure: '20K', size: '150A', outerDiameter: 285, boltHoles: 12, thickness: 30, boltSize: 'M22', boltPitch: 2.5, nutThickness: 18, pcd: 240},
+            {standard: 'JIS', pressure: '20K', size: '200A', outerDiameter: 340, boltHoles: 12, thickness: 32, boltSize: 'M22', boltPitch: 2.5, nutThickness: 18, pcd: 295},
+            {standard: 'JIS', pressure: '20K', size: '250A', outerDiameter: 405, boltHoles: 12, thickness: 34, boltSize: 'M24', boltPitch: 3.0, nutThickness: 19, pcd: 355},
+            {standard: 'JIS', pressure: '20K', size: '300A', outerDiameter: 460, boltHoles: 16, thickness: 34, boltSize: 'M24', boltPitch: 3.0, nutThickness: 19, pcd: 410},
+
+            // API 150LB フランジ
+            {standard: 'API', pressure: '150LB', size: '1/2"', outerDiameter: 89, boltHoles: 4, thickness: 11, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 60.3},
+            {standard: 'API', pressure: '150LB', size: '3/4"', outerDiameter: 98, boltHoles: 4, thickness: 13, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 69.9},
+            {standard: 'API', pressure: '150LB', size: '1"', outerDiameter: 108, boltHoles: 4, thickness: 14, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 79.4},
+            {standard: 'API', pressure: '150LB', size: '1-1/4"', outerDiameter: 117, boltHoles: 4, thickness: 16, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 88.9},
+            {standard: 'API', pressure: '150LB', size: '1-1/2"', outerDiameter: 127, boltHoles: 4, thickness: 16, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 98.4},
+            {standard: 'API', pressure: '150LB', size: '2"', outerDiameter: 152, boltHoles: 4, thickness: 19, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 120.7},
+            {standard: 'API', pressure: '150LB', size: '2-1/2"', outerDiameter: 178, boltHoles: 4, thickness: 22, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 139.7},
+            {standard: 'API', pressure: '150LB', size: '3"', outerDiameter: 190, boltHoles: 4, thickness: 22, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 152.4},
+            {standard: 'API', pressure: '150LB', size: '4"', outerDiameter: 229, boltHoles: 8, thickness: 24, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 190.5},
+            {standard: 'API', pressure: '150LB', size: '5"', outerDiameter: 254, boltHoles: 8, thickness: 24, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 215.9},
+            {standard: 'API', pressure: '150LB', size: '6"', outerDiameter: 279, boltHoles: 8, thickness: 25, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 241.3},
+            {standard: 'API', pressure: '150LB', size: '8"', outerDiameter: 343, boltHoles: 8, thickness: 28, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 298.5},
+            {standard: 'API', pressure: '150LB', size: '10"', outerDiameter: 406, boltHoles: 12, thickness: 30, boltSize: '7/8"', boltPitch: 1.81, nutThickness: 14, pcd: 362.0},
+            {standard: 'API', pressure: '150LB', size: '12"', outerDiameter: 483, boltHoles: 12, thickness: 32, boltSize: '7/8"', boltPitch: 1.81, nutThickness: 14, pcd: 431.8},
+
+            // API 300LB フランジ
+            {standard: 'API', pressure: '300LB', size: '1/2"', outerDiameter: 95, boltHoles: 4, thickness: 14, boltSize: '1/2"', boltPitch: 1.27, nutThickness: 8, pcd: 66.7},
+            {standard: 'API', pressure: '300LB', size: '3/4"', outerDiameter: 117, boltHoles: 4, thickness: 16, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 82.6},
+            {standard: 'API', pressure: '300LB', size: '1"', outerDiameter: 124, boltHoles: 4, thickness: 17, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 88.9},
+            {standard: 'API', pressure: '300LB', size: '1-1/4"', outerDiameter: 133, boltHoles: 4, thickness: 18, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 98.4},
+            {standard: 'API', pressure: '300LB', size: '1-1/2"', outerDiameter: 156, boltHoles: 4, thickness: 21, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 114.3},
+            {standard: 'API', pressure: '300LB', size: '2"', outerDiameter: 165, boltHoles: 8, thickness: 22, boltSize: '5/8"', boltPitch: 1.41, nutThickness: 10, pcd: 127.0},
+            {standard: 'API', pressure: '300LB', size: '2-1/2"', outerDiameter: 190, boltHoles: 8, thickness: 25, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 149.2},
+            {standard: 'API', pressure: '300LB', size: '3"', outerDiameter: 210, boltHoles: 8, thickness: 27, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 168.3},
+            {standard: 'API', pressure: '300LB', size: '4"', outerDiameter: 254, boltHoles: 8, thickness: 32, boltSize: '3/4"', boltPitch: 1.59, nutThickness: 12, pcd: 200.0},
+            {standard: 'API', pressure: '300LB', size: '5"', outerDiameter: 279, boltHoles: 8, thickness: 35, boltSize: '7/8"', boltPitch: 1.81, nutThickness: 14, pcd: 235.0},
+            {standard: 'API', pressure: '300LB', size: '6"', outerDiameter: 318, boltHoles: 12, thickness: 36, boltSize: '7/8"', boltPitch: 1.81, nutThickness: 14, pcd: 269.9},
+            {standard: 'API', pressure: '300LB', size: '8"', outerDiameter: 381, boltHoles: 12, thickness: 41, boltSize: '7/8"', boltPitch: 1.81, nutThickness: 14, pcd: 330.2},
+            {standard: 'API', pressure: '300LB', size: '10"', outerDiameter: 445, boltHoles: 16, thickness: 46, boltSize: '1"', boltPitch: 2.12, nutThickness: 16, pcd: 387.4},
+            {standard: 'API', pressure: '300LB', size: '12"', outerDiameter: 521, boltHoles: 16, thickness: 51, boltSize: '1-1/8"', boltPitch: 2.54, nutThickness: 18, pcd: 450.9}
+        ];
+
+        function calculateAccuracy(inputValues, flange) {
+            let score = 0;
+            let maxScore = 0;
+
+            // 外径の適合度 (重要度: 40%)
+            const diameterDiff = Math.abs(inputValues.outerDiameter - flange.outerDiameter) / flange.outerDiameter;
+            const diameterScore = Math.max(0, 40 - (diameterDiff * 200));
+            score += diameterScore;
+            maxScore += 40;
+
+            // ボルト穴数の適合度 (重要度: 30%)
+            if (inputValues.boltHoles === flange.boltHoles) {
+                score += 30;
+            }
+            maxScore += 30;
+
+            // 厚みの適合度 (重要度: 20%)
+            const thicknessDiff = Math.abs(inputValues.thickness - flange.thickness) / flange.thickness;
+            const thicknessScore = Math.max(0, 20 - (thicknessDiff * 100));
+            score += thicknessScore;
+            maxScore += 20;
+
+            // PCDの適合度 (重要度: 10%) - PCD入力がある場合のみ
+            if (inputValues.pcd && flange.pcd) {
+                const pcdDiff = Math.abs(inputValues.pcd - flange.pcd) / flange.pcd;
+                const pcdScore = Math.max(0, 10 - (pcdDiff * 50));
+                score += pcdScore;
+                maxScore += 10;
+            } else {
+                maxScore += 10; // PCD未入力でも最大スコアは追加
+            }
+
+            return Math.round((score / maxScore) * 100);
+        }
+
+        function calculateBoltLength(flange, gasketType) {
+            const gasketThickness = gasketType === 'RF' ? 3 : 2; // RF: 3mm, FF: 2mm
+            const threadProtrusion = flange.boltPitch * 2.5; // ねじ出代 2.5山
+
+            // マシンボルト首下長さ = フランジ厚み×2 + ガスケット厚み + ナット厚み + ねじ出代2.5山
+            const machineBoltLength = flange.thickness * 2 + gasketThickness + flange.nutThickness + threadProtrusion;
+
+            // スタッドボルト全長 = フランジ厚み×2 + ガスケット厚み + ナット厚み×2 + ねじ出代5山(両端)
+            const studBoltLength = flange.thickness * 2 + gasketThickness + (flange.nutThickness * 2) + (threadProtrusion * 2);
+
+            // 5mm単位で切り上げ
+            return {
+                machine: Math.ceil(machineBoltLength / 5) * 5,
+                stud: Math.ceil(studBoltLength / 5) * 5
+            };
+        }
+
+        function identifyFlange() {
+            const inputValues = {
+                outerDiameter: parseFloat(document.getElementById('outerDiameter').value),
+                boltHoles: parseInt(document.getElementById('boltHoles').value),
+                thickness: parseFloat(document.getElementById('thickness').value),
+                pcd: parseFloat(document.getElementById('pcd').value) || null
+            };
+
+            // 入力値検証
+            if (!inputValues.outerDiameter || !inputValues.boltHoles || !inputValues.thickness) {
+                alert('必要な測定値を全て入力してください。');
+                return;
+            }
+
+            // 全フランジに対して適合度を計算
+            const results = flangeDatabase.map(flange => ({
+                ...flange,
+                accuracy: calculateAccuracy(inputValues, flange)
+            }))
+            .filter(flange => flange.accuracy >= 60) // 60%以上の適合度のみ
+            .sort((a, b) => b.accuracy - a.accuracy)
+            .slice(0, 4); // 上位4位まで
+
+            if (results.length === 0) {
+                alert('適合するフランジが見つかりませんでした。測定値を確認してください。');
+                return;
+            }
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const gasketInfo = document.getElementById('gasketInfo');
+
+            // ガスケット情報を表示
+            gasketInfo.innerHTML = `
+                <strong>📋 ガスケット形状別ボルト長さ</strong><br>
+                <small>RF (レイズドフェース): ガスケット厚み 3mm / FF (フラットフェース): ガスケット厚み 2mm</small>
+            `;
+
+            resultsContainer.innerHTML = '';
+
+            results.forEach((flange, index) => {
+                const boltLengths = {
+                    RF: calculateBoltLength(flange, 'RF'),
+                    FF: calculateBoltLength(flange, 'FF')
+                };
+
+                const rankClass = `rank-${index + 1}`;
+
+                const resultCard = document.createElement('div');
+                resultCard.className = `result-card ${rankClass}`;
+
+                resultCard.innerHTML = `
+                    <div class="rank-badge">${index + 1}位</div>
+                    <div class="accuracy">適合度: ${flange.accuracy}%</div>
+
+                    <div class="flange-info">
+                        <div class="flange-title">
+                            ${flange.standard} ${flange.pressure} ${flange.size}
+                        </div>
+                        <div class="flange-details">
+                            📏 外径: ${flange.outerDiameter}mm | 
+                            🔩 ボルト: ${flange.boltSize} × ${flange.boltHoles}本 |
+                            📐 厚み: ${flange.thickness}mm
+                            ${flange.pcd ? ` | ⭕ PCD: ${flange.pcd}mm` : ''}
+                        </div>
+                    </div>
+
+                    <div class="bolt-specs">
+                        <div class="bolt-type">
+                            <h4>🔧 マシンボルト (首下寸法)</h4>
+                            <div><strong>RF用:</strong> ${boltLengths.RF.machine}mm</div>
+                            <div><strong>FF用:</strong> ${boltLengths.FF.machine}mm</div>
+                            <div><small>ねじ出代: ${(flange.boltPitch * 2.5).toFixed(1)}mm</small></div>
+                        </div>
+
+                        <div class="bolt-type">
+                            <h4>🔩 スタッドボルト (全長)</h4>
+                            <div><strong>RF用:</strong> ${boltLengths.RF.stud}mm</div>
+                            <div><strong>FF用:</strong> ${boltLengths.FF.stud}mm</div>
+                            <div><small>両端出代: ${(flange.boltPitch * 5).toFixed(1)}mm</small></div>
+                        </div>
+                    </div>
+                `;
+
+                resultsContainer.appendChild(resultCard);
+            });
+
+            document.getElementById('inputSection').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function goHome() {
+            // 入力値をクリア
+            document.getElementById('outerDiameter').value = '';
+            document.getElementById('boltHoles').value = '';
+            document.getElementById('thickness').value = '';
+            document.getElementById('pcd').value = '';
+
+            // 画面を切り替え
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('inputSection').style.display = 'block';
+        }
+    </script>
+    
+    <div class="ad-container">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+             data-ad-slot="yyyyyyyyyyyyyyyy"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+</body>
+</html>
